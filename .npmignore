@@ -1,0 +1,8 @@
+README.md
+jest.config.json
+test/
+.rpt2_cache
+yarn.lock
+yarn-error.log
+rollup.config.js
+.vscode/
