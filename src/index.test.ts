@@ -1,5 +1,15 @@
 import init from './index';
 
+const getState = () => init({
+  n: 1,
+  s: 'test',
+  b: true,
+  a: [1, 2, 4],
+  c: [{a: 1, b: 2, c: 3}],
+  o: {a: 1, b: 2, c: 3},
+  test: 789
+});
+
 test('store initializes with public API', () => {
   const state = init({
     n: 1,
@@ -27,27 +37,13 @@ test('store initializes with public API', () => {
 });
 
 test('store can retrieve a value', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-  });
+  const state = getState();
 
   expect(state.get('n')).toBe(1);
 });
 
 test('store can retrieve state object', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-  });
+  const state = getState();
 
   expect(state.get('*')).toEqual({
     n: 1,
@@ -56,46 +52,26 @@ test('store can retrieve state object', () => {
     a: [1, 2, 4],
     c: [{a: 1, b: 2, c: 3}],
     o: {a: 1, b: 2, c: 3},
+    test: 789
   });
 });
 
 test('store can retrieve state object by path', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-  });
+  const state = getState();
 
   expect(state.get('o.a')).toEqual(1);
 });
 
 test('passing an invalid path to get() returns null', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-  });
+  const state = getState();
 
   expect(state.get('a.b.c')).toBe(null);
 });
 
 test('store can retrieve filtered state object', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-  });
+  const state = getState();
 
-  expect(state.exclude(['a', 'c', 'o'])).toEqual({
+  expect(state.exclude(['a', 'c', 'o', 'test'])).toEqual({
     n: 1,
     s: 'test',
     b: true,
@@ -103,15 +79,7 @@ test('store can retrieve filtered state object', () => {
 });
 
 test('store can update a value', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   state.set({test: 123})
 
@@ -135,15 +103,7 @@ test('store rejects setting of properties not declared initially', () => {
 });
 
 test('store can react to state change', (done) => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   state.connect({
     test: ({test}) => {
@@ -156,15 +116,7 @@ test('store can react to state change', (done) => {
 });
 
 test('context can be passed to connect', (done) => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   let obj = {
     finish: function() {
@@ -183,15 +135,7 @@ test('context can be passed to connect', (done) => {
 });
 
 test('store can handle actions in response to triggers', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   state.connect({
     testTrigger: (foo, bar) => {
@@ -209,15 +153,7 @@ test('store can handle actions in response to triggers', () => {
 });
 
 test('trigger can return the callback\'s value', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   state.connect({
     testTrigger: (foo, bar) => {
@@ -238,15 +174,7 @@ test('trigger can return the callback\'s value', () => {
 });
 
 test('connect can accept a string', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   state.connect('test', ({test}) => {
     expect(test).toBe(123);
@@ -256,15 +184,7 @@ test('connect can accept a string', () => {
 });
 
 test('connect can accept an array', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn = jest.fn();
 
@@ -278,15 +198,7 @@ test('connect can accept an array', () => {
 });
 
 test('connect can add multiple state listeners', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   state.connect({
     n: ({n}) => {
@@ -304,15 +216,7 @@ test('connect can add multiple state listeners', () => {
 });
 
 test('connect can add state listeners for all keys', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn = jest.fn();
 
@@ -325,15 +229,7 @@ test('connect can add state listeners for all keys', () => {
 });
 
 test('listeners can be disconnected by number ID', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn = jest.fn();
 
@@ -352,15 +248,7 @@ test('listeners can be disconnected by number ID', () => {
 });
 
 test('listeners can be disconnected by key', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn = jest.fn();
 
@@ -379,15 +267,7 @@ test('listeners can be disconnected by key', () => {
 });
 
 test('duplicate listeners are concatenated', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn = jest.fn();
 
@@ -406,15 +286,7 @@ test('duplicate listeners are concatenated', () => {
 });
 
 test('duplicate listener keys with unique callbacks are not concatenated', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn1 = jest.fn();
   const testFn2 = jest.fn();
@@ -435,15 +307,7 @@ test('duplicate listener keys with unique callbacks are not concatenated', () =>
 });
 
 test('listeners can be disconnected by a list of keys', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn1 = jest.fn();
   const testFn2 = jest.fn();
@@ -470,15 +334,7 @@ test('listeners can be disconnected by a list of keys', () => {
 });
 
 test('all listeners can be removed', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn1 = jest.fn();
   const testFn2 = jest.fn();
@@ -505,15 +361,7 @@ test('all listeners can be removed', () => {
 });
 
 test('store can detect value change', () => {
-  const state = init({
-    n: 1,
-    s: 'test',
-    b: true,
-    a: [1, 2, 4],
-    c: [{a: 1, b: 2, c: 3}],
-    o: {a: 1, b: 2, c: 3},
-    test: 789
-  });
+  const state = getState();
 
   const testFn1 = jest.fn();
   const testFn2 = jest.fn();
@@ -575,6 +423,76 @@ test('store can detect value change', () => {
   expect(testFn3).toHaveBeenCalledTimes(2);
   expect(testFn4).toHaveBeenCalledTimes(2);
   expect(testFn5).toHaveBeenCalledTimes(2);
+});
+
+test('store\'s value change heuristic can be overridden', (done) => {
+  const state = getState();
+
+  const testFn1 = jest.fn();
+  const testFn2 = jest.fn();
+  const testFn3 = jest.fn();
+  const testFn4 = jest.fn();
+  const testFn5 = jest.fn();
+
+  const callback = () => {
+    expect(testFn1).toHaveBeenCalledTimes(2);
+    expect(testFn2).toHaveBeenCalledTimes(2);
+    expect(testFn3).toHaveBeenCalledTimes(2);
+    expect(testFn4).toHaveBeenCalledTimes(2);
+    expect(testFn5).toHaveBeenCalledTimes(2);
+
+    done();
+  };
+
+  state.connect({
+    n: testFn1,
+    test: testFn2,
+    o: testFn3,
+    a: testFn4,
+    c: testFn5
+  });
+
+  state.set({
+    n: 1,
+    s: 'test',
+    b: true,
+    a: [1, 2, 4],
+    c: [{a: 1, b: 2, c: 3}],
+    o: {a: 1, b: 2, c: 3},
+    test: 789
+  });
+
+  expect(testFn1).toHaveBeenCalledTimes(0);
+  expect(testFn2).toHaveBeenCalledTimes(0);
+  expect(testFn3).toHaveBeenCalledTimes(0);
+  expect(testFn4).toHaveBeenCalledTimes(0);
+  expect(testFn5).toHaveBeenCalledTimes(0);
+
+  state.set({
+    n: 1,
+    s: 'test',
+    b: true,
+    a: [1, 2, 4],
+    c: [{a: 1, b: 2, c: 3}],
+    o: {a: 1, b: 2, c: 3},
+    test: 789
+  }, true);
+
+  expect(testFn1).toHaveBeenCalledTimes(1);
+  expect(testFn2).toHaveBeenCalledTimes(1);
+  expect(testFn3).toHaveBeenCalledTimes(1);
+  expect(testFn4).toHaveBeenCalledTimes(1);
+  expect(testFn5).toHaveBeenCalledTimes(1);
+
+  state.set({
+    n: 1,
+    s: 'test',
+    b: true,
+    a: [1, 2, 4],
+    c: [{a: 1, b: 2, c: 3}],
+    o: {a: 1, b: 2, c: 3},
+    test: 789
+  }, callback, true);
 });
 
 test('ignores duplicate falsy values', () => {

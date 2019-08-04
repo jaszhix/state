@@ -168,6 +168,8 @@ function init(state: State, listeners: Listener[] = [], connections = 0) {
     let changed = false;
     let changedObject = {};
 
+    force = cb === true || force;
+
     for (let i = 0; i < keys.length; i++) {
       if (!(keys[i] in state)) {
         storeError('set', keys[i], 'Property not found.');
@@ -176,21 +178,19 @@ function init(state: State, listeners: Listener[] = [], connections = 0) {
 
       let isObject = object[keys[i]] && typeof object[keys[i]] === 'object';
 
-      if ((isObject && !isEqual(state[keys[i]], object[keys[i]]))
+      if (force
+        || (isObject && !isEqual(state[keys[i]], object[keys[i]]))
         || (!isObject && state[keys[i]] !== object[keys[i]])) {
         changed = true;
         changedObject[keys[i]] = state[keys[i]] = object[keys[i]];
       }
     }
 
-    if ((changed || cb === true || force) && listeners.length > 0) {
+    if ((changed || force) && listeners.length > 0) {
       dispatch(changedObject);
-    } /* else {
-      console.log(`e.stack: `, new Error().stack)
-      console.log('NO CHANGE:', keys.join(', '))
-    } */
+    }
 
-    if (typeof cb === 'function') cb();
+    if (typeof cb === 'function') setTimeout(cb, 0);
 
     return publicAPI;
   }
