@@ -530,3 +530,42 @@ test('isEqual doesn\'t throw if null is passed to it', () => {
 
   expect(testFn1).toHaveBeenCalledTimes(1);
 });
+
+test('store can optionally accept partial object values and mutate child objects', () => {
+  // Without setMergeKeys called
+  let state = init({
+    obj: {
+      a: 1,
+      b: 2,
+      c: 3
+    }
+  });
+
+  state.set({
+    obj: {c: 4}
+  });
+
+  // The object's value was copied over instead of mutated.
+  expect(state.get('obj').a != null).toBe(false);
+
+  // With setMergeKeys called
+  state = init({
+    obj: {
+      a: 1,
+      b: 2,
+      c: 3
+    }
+  })
+  .setMergeKeys(['obj']);
+
+  state.set({
+    obj: {c: 4}
+  });
+
+  expect(state.get('obj').a != null).toBe(true);
+  expect(state.get('obj')).toEqual({
+    a: 1,
+    b: 2,
+    c: 4
+  });
+});

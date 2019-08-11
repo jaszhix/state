@@ -98,10 +98,16 @@ function isEqual(obj1, obj2) {
  * See _connect.
  * @returns Initial state object with the public API.
  */
-function init(state: State, listeners: Listener[] = [], connections = 0) {
+function init(
+  state: State,
+  listeners: Listener[] = [],
+  mergeKeys: string[] = [],
+  connections = 0
+) {
   const publicAPI: State = Object.freeze({
     get,
     set,
+    setMergeKeys,
     exclude,
     trigger,
     connect,
@@ -182,6 +188,12 @@ function init(state: State, listeners: Listener[] = [], connections = 0) {
         || (isObject && !isEqual(state[keys[i]], object[keys[i]]))
         || (!isObject && state[keys[i]] !== object[keys[i]])) {
         changed = true;
+
+        if (mergeKeys.indexOf(keys[i]) > -1) {
+          Object.assign(state[keys[i]], object[keys[i]]);
+          continue;
+        }
+
         changedObject[keys[i]] = state[keys[i]] = object[keys[i]];
       }
     }
@@ -192,6 +204,27 @@ function init(state: State, listeners: Listener[] = [], connections = 0) {
 
     if (typeof cb === 'function') setTimeout(cb, 0);
 
+    return publicAPI;
+  }
+
+  /**
+   * setMergeKeys
+   * Adds a list of keys that should be merged into state child object instead of copied.
+   * This allows being able to pass partial objects to set(). Since there is a performance
+   * cost to this operation, it is not the default behavior.
+   *
+   * @param {array} keys
+   * @returns Public API for chaining.
+   */
+  function setMergeKeys(keys: string[] = []): State {
+    for (let i = 0, len = keys.length; i < len; i++) {
+      const key = keys[i];
+      const value = state[key];
+
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        mergeKeys.push(key);
+      }
+    }
     return publicAPI;
   }
 
