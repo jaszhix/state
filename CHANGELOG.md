@@ -1,3 +1,7 @@
+## 1.0.3
+
+ * Fixed incorrect `dispatch` arguments for keys included in `mergeKeys`.
+
 ## 1.0.2
 
  * Added method `setMergeKeys`. This allows specifying child object keys whose values should be mutated instead of copied over with the child objects passed to `set`.
