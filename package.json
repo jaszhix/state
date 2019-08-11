@@ -1,6 +1,6 @@
 {
   "name": "@jaszhix/state",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Small state management library that handles dispatching callbacks on state change, or manual triggers",
   "private": false,
   "author": "Jason Hicks",
