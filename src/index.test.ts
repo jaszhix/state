@@ -569,3 +569,26 @@ test('store can optionally accept partial object values and mutate child objects
     c: 4
   });
 });
+
+test('store dispatches state change callback for keys included in mergeKeys', () => {
+  let state = init({
+    obj: {
+      a: 1,
+      b: 2,
+      c: 3
+    }
+  })
+  .setMergeKeys(['obj']);
+
+  const testFn1 = jest.fn(({obj}) => {
+    expect(obj.a != null).toBe(true);
+  });
+
+  state.connect({
+    obj: testFn1
+  });
+
+  state.set({obj: {b: 9}});
+
+  expect(testFn1).toHaveBeenCalledTimes(1);
+});

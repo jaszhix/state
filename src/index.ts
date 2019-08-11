@@ -177,24 +177,27 @@ function init(
     force = cb === true || force;
 
     for (let i = 0; i < keys.length; i++) {
-      if (!(keys[i] in state)) {
-        storeError('set', keys[i], 'Property not found.');
+      const key = keys[i];
+
+      if (!(key in state)) {
+        storeError('set', key, 'Property not found.');
         return;
       }
 
-      let isObject = object[keys[i]] && typeof object[keys[i]] === 'object';
+      let isObject = object[key] && typeof object[key] === 'object';
 
       if (force
-        || (isObject && !isEqual(state[keys[i]], object[keys[i]]))
-        || (!isObject && state[keys[i]] !== object[keys[i]])) {
+        || (isObject && !isEqual(state[key], object[key]))
+        || (!isObject && state[key] !== object[key])) {
         changed = true;
 
-        if (mergeKeys.indexOf(keys[i]) > -1) {
-          Object.assign(state[keys[i]], object[keys[i]]);
+        if (mergeKeys.indexOf(key) > -1) {
+          Object.assign(state[key], object[key]);
+          changedObject[key] = state[key];
           continue;
         }
 
-        changedObject[keys[i]] = state[keys[i]] = object[keys[i]];
+        changedObject[key] = state[key] = object[key];
       }
     }
 
