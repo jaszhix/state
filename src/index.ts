@@ -1,40 +1,22 @@
+/// <reference path="../index.d.ts" />
+
 import {find, findIndex, filter} from '@jaszhix/utils';
 
-interface State extends Object {
-  get?: Function;
-  set?: Function;
-  exclude?: Function;
-  trigger?: Function;
-  connect?: Function;
-  disconnect?: Function;
-  destroy?: Function;
-  [x: string]: any;
-}
-
-interface _Listener {
-  keys: string[];
-  id: number;
-  callback: Function
-}
-
-type Listener = _Listener;
-type DisconnectKey = string | Array<string> | number;
-
-function storeError(method: string, key: DisconnectKey, message: string): void {
+function storeError(method: string, key: State.DisconnectKey, message: string): void {
   console.warn('Warning: [store -> ' + method + ' -> ' + key + '] ' + message, new Error().stack);
 }
 
-function getByPath(key: string, object: State): State {
+function getByPath(key: string, object: State.Data): State.Data | null {
   const path = key.split('.');
   for (let i = 0; i < path.length; i++) {
     object = object[path[i]];
 
-    if (!object) return null
+    if (!object) return null;
   }
   return object;
 }
 
-function differenceKeys(arr1, arr2) {
+function differenceKeys(arr1: string[], arr2: string[]): string[] {
   let newKeys = [];
 
   for (let i = 0, len = arr1.length; i < len; i++) {
@@ -58,7 +40,7 @@ function intersectKeys(arr1: string[], arr2: string[]): string[] {
   return newKeys;
 }
 
-function isEqual(obj1, obj2) {
+function isEqual(obj1: any, obj2: any): boolean {
   let keys1, keys2, len, matches;
 
   if (!obj1 || !obj2 || typeof obj1 !== 'object' || typeof obj2 !== 'object') {
@@ -99,12 +81,12 @@ function isEqual(obj1, obj2) {
  * @returns Initial state object with the public API.
  */
 function init(
-  state: State,
-  listeners: Listener[] = [],
+  state: Partial<State.Data>,
+  listeners: State.Listener[] = [],
   mergeKeys: string[] = [],
   connections = 0
-) {
-  const publicAPI: State = Object.freeze({
+): State.Data {
+  const publicAPI: State.API = Object.freeze({
     get,
     set,
     setMergeKeys,
@@ -115,7 +97,7 @@ function init(
     destroy
   });
 
-  function getAPIWithObject(object: State): State {
+  function getAPIWithObject(object: State.Data): State.Data {
     return Object.assign(object, publicAPI);
   }
 
@@ -125,7 +107,7 @@ function init(
    *
    * @param {object} object
    */
-  function dispatch(object) {
+  function dispatch(object: Partial<State.Data>) {
     let keys = Object.keys(object);
     for (let i = 0; i < listeners.length; i++) {
       let commonKeys = intersectKeys(keys, listeners[i].keys);
@@ -133,7 +115,7 @@ function init(
       if (commonKeys.length === 0) continue;
 
       if (listeners[i].callback) {
-        let partialState = {};
+        let partialState: Partial<State.Data> = {};
         for (let z = 0; z < keys.length; z++) {
           partialState[keys[z]] = state[keys[z]];
         }
@@ -149,13 +131,13 @@ function init(
    * @param {string} [key=null]
    * @returns {object}
    */
-  function get(key: string = '') {
+  function get(key: string = ''): any {
     if (!key || key === '*') {
       return exclude();
     }
 
     if (key.indexOf('.') > -1) {
-      return getByPath(key, state);
+      return getByPath(key, <State.Data>state);
     }
 
     return state[key];
@@ -169,10 +151,10 @@ function init(
    * @param {object} object
    * @param {boolean} forceDispatch
    */
-  function set(object: State, cb: Function | boolean = false, force = false): State | void {
+  function set(object: Partial<State.Data>, cb?: (() => void) | boolean, force?: boolean): State.API {
     let keys = Object.keys(object);
     let changed = false;
-    let changedObject = {};
+    let changedObject: Partial<State.Data> = {};
 
     force = cb === true || force;
 
@@ -181,7 +163,7 @@ function init(
 
       if (!(key in state)) {
         storeError('set', key, 'Property not found.');
-        return;
+        return publicAPI;
       }
 
       let isObject = object[key] && typeof object[key] === 'object';
@@ -219,7 +201,7 @@ function init(
    * @param {array} keys
    * @returns Public API for chaining.
    */
-  function setMergeKeys(keys: string[] = []): State {
+  function setMergeKeys(keys: string[] = []): State.API {
     for (let i = 0, len = keys.length; i < len; i++) {
       const key = keys[i];
       const value = state[key];
@@ -228,6 +210,7 @@ function init(
         mergeKeys.push(key);
       }
     }
+
     return publicAPI;
   }
 
@@ -239,10 +222,11 @@ function init(
    * @returns Partial or full state object with keys in
    * excludeKeys excluded, along with the public API for chaining.
    */
-  function exclude(excludeKeys: string[] = []): object {
+  function exclude(excludeKeys: string[] = []): Partial<State.Data> {
     let apiKeys = Object.keys(publicAPI);
     let stateKeys = Object.keys(state);
-    let filteredState = {};
+    let filteredState: Partial<State.Data> = {};
+
     for (let i = 0, len = stateKeys.length; i < len; i++) {
       if (apiKeys.indexOf(stateKeys[i]) === -1
         && excludeKeys.indexOf(stateKeys[i]) === -1) {
@@ -262,8 +246,8 @@ function init(
    * @param {any} args
    * @returns {any} Return result of the callback.
    */
-  function trigger(key, ...args): any {
-    let matchedListeners = filter(listeners, function(listener) {
+  function trigger(key: string, ...args: any[]): any {
+    let matchedListeners = filter(listeners, function(listener: State.Listener) {
       return listener.keys.indexOf(key) > -1;
     });
 
@@ -282,12 +266,11 @@ function init(
     }
   }
 
-  function _connect(keys: any, callback: Function, id: number, context: object): void {
-    let listener: Listener;
+  function _connect(keys: string[], callback: State.StateCallback | State.TriggerCallback, id: number, context: object | undefined): void {
+    let listener: State.Listener | undefined;
 
     if (callback) {
-
-      listener = find(listeners, _listener => _listener && _listener.callback === callback);
+      listener = find(listeners, (_listener: State.Listener) => _listener && _listener.callback === callback);
 
       if (context) {
         callback = callback.bind(context);
@@ -311,27 +294,27 @@ function init(
    * @returns ID of the added listener.
    */
   function connect(
-    actions: any,
-    callback: Function,
-    context: object
+    actions: State.ConnectActions,
+    callback?: State.Callback,
+    context?: object | undefined
   ): number {
     const id = connections++;
-    let keys;
+    let keys: string[];
 
     switch (true) {
       case (actions === '*'):
-        listeners.push({keys: Object.keys(state), callback, id});
+        listeners.push({keys: Object.keys(state), callback: <State.Callback>callback, id});
         break;
       case (typeof actions === 'string'):
-        _connect([actions], callback, id, context);
+        _connect([<string>actions], <State.Callback>callback, id, context);
         break;
       case (Array.isArray(actions)):
-        _connect(actions, callback, id, context);
+        _connect(<string[]>actions, <State.Callback>callback, id, context);
         break;
       case (typeof actions === 'object'):
         keys = Object.keys(actions);
         for (let i = 0; i < keys.length; i++) {
-          _connect([keys[i]], actions[keys[i]], id, context);
+          _connect([keys[i]], <State.StateCallback>(<State.ActionsObject>actions)[keys[i]], id, context);
         }
         break;
     }
@@ -339,8 +322,8 @@ function init(
     return id;
   }
 
-  function findListenerFn(key) {
-    return function(listener) {
+  function findListenerFn(key: State.DisconnectKey) {
+    return function(listener: State.Listener) {
       for (let i = 0, len = listener.keys.length; i < len; i++) {
         if (listener.keys[i] === key) return true;
       }
@@ -349,7 +332,7 @@ function init(
     }
   }
 
-  function disconnectByKey(key: DisconnectKey): void {
+  function disconnectByKey(key: State.DisconnectKey): void {
     let matches = filter(listeners, findListenerFn(key));
     let count = matches.length;
 
@@ -371,7 +354,7 @@ function init(
    *
    * @param {string} key
    */
-  function disconnect(key: DisconnectKey) {
+  function disconnect(key: State.DisconnectKey): void {
     switch (true) {
       case (typeof key === 'string'):
         disconnectByKey(key);
@@ -384,7 +367,7 @@ function init(
         break;
       case (typeof key === 'number'):
         for (let i = 0; i < listeners.length; i++) {
-          let index = findIndex(listeners, function(listener) {
+          let index = findIndex(listeners, function(listener: State.Listener) {
             return listener.id === key;
           });
 
@@ -404,12 +387,13 @@ function init(
    */
   function destroy() {
     for (let i = 0; i < listeners.length; i++) {
+      // @ts-ignore
       listeners[i] = undefined;
     }
     listeners = [];
   }
 
-  return getAPIWithObject(state);
+  return getAPIWithObject(<State.Data>state);
 }
 
-export default init;
+export {init};

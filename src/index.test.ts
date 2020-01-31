@@ -1,4 +1,5 @@
-import init from './index';
+/// <reference path="../index.d.ts" />
+import {init} from './index';
 
 const getState = () => init({
   n: 1,
@@ -37,7 +38,7 @@ test('store initializes with public API', () => {
 });
 
 test('store can retrieve a value', () => {
-  const state = getState();
+  const state: State.Data = getState();
 
   expect(state.get('n')).toBe(1);
 });
@@ -81,7 +82,7 @@ test('store can retrieve filtered state object', () => {
 test('store can update a value', () => {
   const state = getState();
 
-  state.set({test: 123})
+  state.set({test: 123});
 
   expect(state.test).toBe(123);
 });
@@ -106,7 +107,7 @@ test('store can react to state change', (done) => {
   const state = getState();
 
   state.connect({
-    test: ({test}) => {
+    test: ({test}: Partial<State.Data>) => {
       expect(test).toBe(123);
       done();
     }
@@ -122,7 +123,7 @@ test('context can be passed to connect', (done) => {
     finish: function() {
       done();
     },
-    callback: function({test}) {
+    callback: function({test}: Partial<State.Data>) {
       expect(test).toBe(123);
       expect(typeof this.finish).toBe('function');
       this.finish();
@@ -143,7 +144,7 @@ test('store can handle actions in response to triggers', () => {
       expect(bar).toBe('barValue');
       state.set({test: 123});
     },
-    test: ({test}) => {
+    test: ({test}: Partial<State.Data>) => {
       expect(test).toBe(123);
     }
   });
@@ -163,7 +164,7 @@ test('trigger can return the callback\'s value', () => {
 
       return 'finalValue';
     },
-    test: ({test}) => {
+    test: ({test}: Partial<State.Data>) => {
       expect(test).toBe(123);
     }
   });
@@ -176,7 +177,7 @@ test('trigger can return the callback\'s value', () => {
 test('connect can accept a string', () => {
   const state = getState();
 
-  state.connect('test', ({test}) => {
+  state.connect('test', ({test}: Partial<State.Data>) => {
     expect(test).toBe(123);
   });
 
@@ -201,10 +202,10 @@ test('connect can add multiple state listeners', () => {
   const state = getState();
 
   state.connect({
-    n: ({n}) => {
+    n: ({n}: Partial<State.Data>) => {
       expect(n).toBe(48);
     },
-    test: ({test}) => {
+    test: ({test}: Partial<State.Data>) => {
       expect(test).toBe(123);
     }
   });

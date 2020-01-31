@@ -1,6 +1,6 @@
 {
   "name": "@jaszhix/state",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Small state management library that handles dispatching callbacks on state change, or manual triggers",
   "private": false,
   "author": "Jason Hicks",
@@ -28,18 +28,20 @@
   },
   "main": "build/state.js",
   "module": "build/state.js",
-  "types": "build/types/src/index.d.ts",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jaszhix/state.git"
   },
   "dependencies": {},
   "peerDependencies": {
-    "@jaszhix/utils": "^1.0.2"
+    "@jaszhix/utils": "1.0.4"
   },
   "devDependencies": {
-    "@jaszhix/utils": "^1.0.2",
+    "@jaszhix/utils": "1.0.4",
+    "@types/eslint": "6.1.0",
     "@types/jest": "^24.0.16",
+    "@types/rollup-plugin-json": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
     "babel-jest": "^24.8.0",

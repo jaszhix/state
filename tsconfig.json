@@ -7,17 +7,15 @@
     "target": "esnext",
     "sourceMap": true,
     "jsx": "react",
-    "declaration": true,
-    "declarationDir": "build/types",
+    "declaration": false,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strict": false,
+    "strict": true,
     "typeRoots": [
-      "node_modules/@types",
-      "types"
+      "node_modules/@types"
     ],
     "lib": [
       "es2018",
@@ -25,6 +23,6 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "src/index.ts"
   ]
 }
